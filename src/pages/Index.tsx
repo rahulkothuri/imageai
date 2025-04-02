@@ -2,8 +2,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
+import Header from "@/components/Header";
+import Banner from "@/components/Banner";
 import ImageUploader from "@/components/ImageUploader";
 import ImageComparison from "@/components/ImageComparison";
+import Features from "@/components/Features";
+import Testimonials from "@/components/Testimonials";
+import Footer from "@/components/Footer";
 import { unblurImage } from "@/services/imageService";
 
 const Index = () => {
@@ -51,30 +56,51 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Image Unblurring Tool
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Upload your blurry images and watch them transform with our AI-powered enhancement technology.
-          </p>
-          <div className="mt-6 inline-block">
-            <span className="subtle-badge flex items-center">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Powered by AI
-            </span>
+    <div className="min-h-screen bg-white">
+      <Header />
+      
+      {!originalImage && (
+        <>
+          <Banner />
+          
+          <div className="py-16 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Unblur Your Images Now
+                </h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  Upload your blurry image and our AI will enhance it instantly.
+                </p>
+              </div>
+              
+              <ImageUploader 
+                onImageSelect={handleImageSelect} 
+                className="max-w-2xl mx-auto shadow-md"
+              />
+            </div>
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
-          {!originalImage ? (
-            <ImageUploader 
-              onImageSelect={handleImageSelect} 
-              className="max-w-xl mx-auto"
-            />
-          ) : (
+          
+          <Features />
+          <Testimonials />
+        </>
+      )}
+      
+      {originalImage && (
+        <div className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Image Enhancement Results
+              </h2>
+              <div className="inline-block bg-blue-50 px-4 py-2 rounded-full">
+                <span className="flex items-center text-blue-600 text-sm font-medium">
+                  <Sparkles className="h-4 w-4 mr-1" />
+                  Enhanced with AI Technology
+                </span>
+              </div>
+            </div>
+            
             <ImageComparison
               originalImage={originalImage}
               processedImage={processedImage}
@@ -82,35 +108,11 @@ const Index = () => {
               fileName={selectedFile?.name || "image"}
               onReset={handleReset}
             />
-          )}
-        </div>
-
-        <div className="bg-blue-50 rounded-lg p-6 border border-blue-100">
-          <h3 className="text-lg font-medium text-blue-800 mb-2">How it works</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 font-bold mb-2">1</div>
-              <h4 className="font-medium mb-1">Upload Your Image</h4>
-              <p className="text-gray-600">Drag and drop or select any blurry image from your device.</p>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 font-bold mb-2">2</div>
-              <h4 className="font-medium mb-1">AI Enhancement</h4>
-              <p className="text-gray-600">Our algorithm analyzes and enhances your image to reduce blur.</p>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 font-bold mb-2">3</div>
-              <h4 className="font-medium mb-1">Download Result</h4>
-              <p className="text-gray-600">Compare the before and after, then download your improved image.</p>
-            </div>
           </div>
         </div>
-
-        <footer className="mt-12 text-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} Image Unblurring Tool. All rights reserved.</p>
-          <p className="mt-1">We don't store your images - all processing happens in your browser.</p>
-        </footer>
-      </div>
+      )}
+      
+      <Footer />
     </div>
   );
 };

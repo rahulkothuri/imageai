@@ -49,8 +49,8 @@ const ImageUploader = ({ onImageSelect, className }: ImageUploaderProps) => {
   return (
     <div
       className={cn(
-        "rounded-lg border-2 border-dashed p-8 transition-colors",
-        isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50",
+        "rounded-xl border-2 border-dashed p-8 transition-colors text-center",
+        isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-white",
         className
       )}
       onDragOver={handleDragOver}
@@ -59,23 +59,24 @@ const ImageUploader = ({ onImageSelect, className }: ImageUploaderProps) => {
     >
       <div className="flex flex-col items-center justify-center space-y-4">
         <div className="p-4 bg-blue-100 rounded-full">
-          <ImageIcon className="h-10 w-10 text-blue-500" />
+          <ImageIcon className="h-12 w-12 text-blue-500" />
         </div>
         <div className="text-center">
-          <h3 className="text-lg font-semibold">Upload a blurred image</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Drag and drop or click to browse
+          <h3 className="text-xl font-semibold">Upload a blurred image</h3>
+          <p className="text-gray-500 mt-2">
+            Drag and drop your image here or click the button below
           </p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Supports: JPG, PNG, WEBP (Max: 10MB)
           </p>
         </div>
         <Button
           onClick={handleButtonClick}
-          className="blue-button mt-4"
+          size="lg"
+          className="mt-4 bg-blue-500 hover:bg-blue-600"
         >
           <Upload className="h-4 w-4 mr-2" />
-          Select Image
+          Upload Image
         </Button>
         <input
           type="file"
