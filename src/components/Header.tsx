@@ -25,10 +25,12 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center space-x-4">
-          <Button variant="outline" className="hidden md:inline-flex">
+          <Button variant="outline" className="hidden md:inline-flex border-gray-200 hover:bg-gray-50 hover:text-blue-500">
             Sign In
           </Button>
-          <Button>Try Free</Button>
+          <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+            Try Free
+          </Button>
         </div>
       </div>
     </header>

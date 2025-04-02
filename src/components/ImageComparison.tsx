@@ -1,8 +1,9 @@
 
 import { useState, useEffect, useRef } from "react";
-import { Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { downloadImage } from "@/services/imageService";
 
 interface ImageComparisonProps {
@@ -23,6 +24,30 @@ const ImageComparison = ({
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const [progressValue, setProgressValue] = useState(0);
+
+  // Simulate progress during loading
+  useEffect(() => {
+    let interval: number;
+    
+    if (isProcessing) {
+      setProgressValue(0);
+      interval = window.setInterval(() => {
+        setProgressValue((prev) => {
+          // Slow down progress as it gets closer to 90%
+          const increment = prev < 30 ? 5 : prev < 60 ? 3 : prev < 80 ? 1 : 0.5;
+          const nextValue = prev + increment;
+          return nextValue > 90 ? 90 : nextValue;
+        });
+      }, 200);
+    } else if (processedImage) {
+      setProgressValue(100);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isProcessing, processedImage]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -75,7 +100,7 @@ const ImageComparison = ({
             size="sm" 
             onClick={handleDownload}
             disabled={!processedImage}
-            className="blue-button"
+            className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Download className="h-4 w-4 mr-2" />
             Download
@@ -85,7 +110,7 @@ const ImageComparison = ({
       
       <div 
         ref={containerRef}
-        className="relative w-full h-[400px] rounded-lg overflow-hidden shadow-md image-card"
+        className="relative w-full h-[400px] rounded-lg overflow-hidden shadow-md bg-gray-50"
       >
         {/* Original Image (Left Side) */}
         <div className="absolute top-0 left-0 w-full h-full">
@@ -114,12 +139,18 @@ const ImageComparison = ({
           </div>
         ) : isProcessing ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-6 p-8 bg-white/80 rounded-xl backdrop-blur-sm max-w-xs w-full">
               <div className="animate-spin">
-                <RefreshCw className="h-8 w-8 text-blue-500" />
+                <Loader className="h-10 w-10 text-blue-500" />
               </div>
-              <p className="text-sm font-medium text-gray-600">
-                Enhancing your image...
+              <div className="w-full space-y-2">
+                <Progress value={progressValue} className="h-2" />
+                <p className="text-sm font-medium text-gray-600 text-center">
+                  Enhancing your image... {Math.round(progressValue)}%
+                </p>
+              </div>
+              <p className="text-xs text-gray-500 text-center">
+                Using AI to remove blur and enhance details
               </p>
             </div>
           </div>
@@ -148,13 +179,13 @@ const ImageComparison = ({
         
         {/* Labels */}
         <div className="absolute bottom-4 left-4">
-          <span className="subtle-badge">
+          <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
             Before
           </span>
         </div>
         
         <div className="absolute bottom-4 right-4">
-          <span className="subtle-badge">
+          <span className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
             After
           </span>
         </div>
