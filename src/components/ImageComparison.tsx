@@ -23,6 +23,7 @@ const ImageComparison = ({
 }: ImageComparisonProps) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const [progressValue, setProgressValue] = useState(0);
 
@@ -49,31 +50,54 @@ const ImageComparison = ({
     };
   }, [isProcessing, processedImage]);
 
+  // Handle mouse and touch events for the slider
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMove = (clientX: number) => {
       if (!isDragging.current || !containerRef.current) return;
       
       const rect = containerRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
       const newPosition = (x / rect.width) * 100;
       setSliderPosition(newPosition);
     };
     
-    const handleMouseUp = () => {
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX);
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      handleMove(e.touches[0].clientX);
+    };
+    
+    const handleEnd = () => {
       isDragging.current = false;
+      document.body.style.cursor = 'default';
     };
     
     document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mouseup", handleEnd);
+    document.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("touchend", handleEnd);
     
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mouseup", handleEnd);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleEnd);
     };
   }, []);
 
-  const handleMouseDown = () => {
+  const handleStart = () => {
     isDragging.current = true;
+    document.body.style.cursor = 'ew-resize';
+  };
+
+  const handleMouseDown = () => {
+    handleStart();
+  };
+
+  const handleTouchStart = () => {
+    handleStart();
   };
 
   const handleDownload = () => {
@@ -112,34 +136,9 @@ const ImageComparison = ({
         ref={containerRef}
         className="relative w-full h-[400px] rounded-lg overflow-hidden shadow-md bg-gray-50"
       >
-        {/* Processed Image (Background - Full Width) */}
-        {processedImage && (
-          <div className="absolute top-0 left-0 w-full h-full">
-            <img 
-              src={processedImage} 
-              alt="Processed"
-              className="w-full h-full object-contain bg-gray-900/5"
-            />
-          </div>
-        )}
-        
-        {/* Original Image (Foreground - Controlled by Slider) */}
-        {originalImage && processedImage && (
-          <div 
-            className="absolute top-0 left-0 h-full overflow-hidden"
-            style={{ width: `${sliderPosition}%` }}
-          >
-            <img 
-              src={originalImage} 
-              alt="Original"
-              className="w-full h-full object-contain bg-gray-900/5"
-            />
-          </div>
-        )}
-        
         {/* Loading State */}
         {isProcessing && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center z-30">
             <div className="flex flex-col items-center space-y-6 p-8 bg-white/80 rounded-xl backdrop-blur-sm max-w-xs w-full">
               <div className="animate-spin">
                 <Loader className="h-10 w-10 text-blue-500" />
@@ -168,38 +167,68 @@ const ImageComparison = ({
           </div>
         )}
         
-        {/* Slider */}
-        {processedImage && (
+        {/* Before & After Comparison View */}
+        {originalImage && processedImage && (
           <>
+            {/* Enhanced Image (Right Side) */}
+            <div className="absolute top-0 left-0 w-full h-full">
+              <img 
+                src={processedImage} 
+                alt="Enhanced"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            
+            {/* Blurred Image (Left Side - controlled by slider) */}
+            <div 
+              className="absolute top-0 left-0 h-full overflow-hidden"
+              style={{ width: `${sliderPosition}%` }}
+            >
+              <img 
+                src={originalImage} 
+                alt="Blurred"
+                className="w-full h-full object-contain"
+                style={{ 
+                  width: `${(100 / sliderPosition) * 100}%`, 
+                  maxWidth: 'none' 
+                }}
+              />
+            </div>
+            
+            {/* Divider Line */}
             <div
-              className="absolute top-0 bottom-0 w-1 bg-white shadow-md cursor-ew-resize z-10"
+              ref={sliderRef}
+              className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg cursor-ew-resize z-20"
               style={{ left: `${sliderPosition}%` }}
               onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
             />
+            
+            {/* Slider Handle */}
             <div
-              className="absolute w-8 h-8 bg-white rounded-full -ml-4 shadow-md flex items-center justify-center cursor-ew-resize z-10"
+              className="absolute w-10 h-10 -ml-5 bg-white rounded-full shadow-lg flex items-center justify-center cursor-ew-resize z-20"
               style={{ 
                 left: `${sliderPosition}%`,
-                top: `calc(50% - 16px)`
+                top: `calc(50% - 20px)`
               }}
               onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
             >
-              <div className="w-1 h-6 bg-gray-300 rounded-full"></div>
+              <div className="flex space-x-[1px]">
+                <div className="w-0.5 h-6 bg-gray-300"></div>
+                <div className="w-0.5 h-6 bg-gray-300"></div>
+              </div>
             </div>
-          </>
-        )}
-        
-        {/* Labels */}
-        {processedImage && (
-          <>
+            
+            {/* Labels */}
             <div className="absolute top-4 left-4 z-20">
-              <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+              <span className="bg-black/70 text-white text-xs px-4 py-1.5 rounded-full">
                 Blurred
               </span>
             </div>
             
             <div className="absolute top-4 right-4 z-20">
-              <span className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
+              <span className="bg-blue-500 text-white text-xs px-4 py-1.5 rounded-full">
                 Enhanced
               </span>
             </div>
