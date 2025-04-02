@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 
 // API key for ImgGen
-const API_KEY = "c7b8190a-bb1d-48f6-bb59-744c64566e7c";
+const API_KEY = "75b8cfcb-1e7a-4a7d-8b10-35a786b90e4a";
 
 export async function unblurImage(imageFile: File): Promise<string> {
   try {
