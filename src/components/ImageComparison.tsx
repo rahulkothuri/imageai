@@ -112,32 +112,33 @@ const ImageComparison = ({
         ref={containerRef}
         className="relative w-full h-[400px] rounded-lg overflow-hidden shadow-md bg-gray-50"
       >
-        {/* Original Image (Left Side) */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          <img 
-            src={originalImage} 
-            alt="Original"
-            className="w-full h-full object-contain bg-gray-900/5"
-          />
-        </div>
+        {/* Processed Image (Background - Full Width) */}
+        {processedImage && (
+          <div className="absolute top-0 left-0 w-full h-full">
+            <img 
+              src={processedImage} 
+              alt="Processed"
+              className="w-full h-full object-contain bg-gray-900/5"
+            />
+          </div>
+        )}
         
-        {/* Processed Image (Right Side with Slider) */}
-        {processedImage ? (
+        {/* Original Image (Foreground - Controlled by Slider) */}
+        {originalImage && processedImage && (
           <div 
             className="absolute top-0 left-0 h-full overflow-hidden"
             style={{ width: `${sliderPosition}%` }}
           >
             <img 
-              src={processedImage} 
-              alt="Processed"
-              className="absolute top-0 left-0 w-[100vw] max-w-none h-full object-contain bg-gray-900/5"
-              style={{ 
-                left: `${-((100 - sliderPosition) / sliderPosition) * 100}%`,
-                width: `${10000 / sliderPosition}%`
-              }}
+              src={originalImage} 
+              alt="Original"
+              className="w-full h-full object-contain bg-gray-900/5"
             />
           </div>
-        ) : isProcessing ? (
+        )}
+        
+        {/* Loading State */}
+        {isProcessing && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex flex-col items-center space-y-6 p-8 bg-white/80 rounded-xl backdrop-blur-sm max-w-xs w-full">
               <div className="animate-spin">
@@ -154,18 +155,29 @@ const ImageComparison = ({
               </p>
             </div>
           </div>
-        ) : null}
+        )}
+        
+        {/* Original Image (When no processed image yet) */}
+        {originalImage && !processedImage && !isProcessing && (
+          <div className="absolute top-0 left-0 w-full h-full">
+            <img 
+              src={originalImage} 
+              alt="Original"
+              className="w-full h-full object-contain bg-gray-900/5"
+            />
+          </div>
+        )}
         
         {/* Slider */}
         {processedImage && (
           <>
             <div
-              className="absolute top-0 bottom-0 w-1 bg-white shadow-md cursor-ew-resize"
+              className="absolute top-0 bottom-0 w-1 bg-white shadow-md cursor-ew-resize z-10"
               style={{ left: `${sliderPosition}%` }}
               onMouseDown={handleMouseDown}
             />
             <div
-              className="absolute w-8 h-8 bg-white rounded-full -ml-4 shadow-md flex items-center justify-center cursor-ew-resize"
+              className="absolute w-8 h-8 bg-white rounded-full -ml-4 shadow-md flex items-center justify-center cursor-ew-resize z-10"
               style={{ 
                 left: `${sliderPosition}%`,
                 top: `calc(50% - 16px)`
@@ -178,17 +190,21 @@ const ImageComparison = ({
         )}
         
         {/* Labels */}
-        <div className="absolute bottom-4 left-4">
-          <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-            Before
-          </span>
-        </div>
-        
-        <div className="absolute bottom-4 right-4">
-          <span className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
-            After
-          </span>
-        </div>
+        {processedImage && (
+          <>
+            <div className="absolute top-4 left-4 z-20">
+              <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+                Blurred
+              </span>
+            </div>
+            
+            <div className="absolute top-4 right-4 z-20">
+              <span className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
+                Enhanced
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
