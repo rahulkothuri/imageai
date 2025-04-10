@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 
 // API key for ImgGen
-const API_KEY = "c7b8190a-bb1d-48f6-bb59-744c64566e7c";
+const API_KEY = "f8f7906f-809a-4251-8ea4-8681e0c06bc0";
 
 type ImageProcessingType = "unblur" | "restore" | "remove-bg";
 

@@ -8,7 +8,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="text-xl font-bold text-blue-500">
-            Unblur.AI
+            ImageAI
           </Link>
         </div>
         

@@ -6,7 +6,7 @@ const Banner = () => {
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-          Unblur Images in Seconds
+          Edit Images in Seconds using AI
         </h1>
         <p className="text-xl text-gray-600 mb-8 mx-auto max-w-2xl">
           Our AI-powered tool makes blurry photos crystal clear with just one click. No signup required.
