@@ -2,16 +2,32 @@
 import { toast } from "sonner";
 
 // API key for ImgGen
-const API_KEY = "9bc2d7c1-3c5b-44be-a3bc-9e723c4cf223";
+const API_KEY = "c7b8190a-bb1d-48f6-bb59-744c64566e7c";
 
-export async function unblurImage(imageFile: File): Promise<string> {
+type ImageProcessingType = "unblur" | "restore" | "remove-bg";
+
+export async function processImage(imageFile: File, type: ImageProcessingType): Promise<string> {
   try {
     // Create form data to send the image
     const formData = new FormData();
     formData.append("image", imageFile);
+    
+    // Determine endpoint based on type
+    let endpoint = "";
+    switch (type) {
+      case "unblur":
+        endpoint = "https://app.imggen.ai/v1/unblur-image";
+        break;
+      case "restore":
+        endpoint = "https://app.imggen.ai/v1/image-restoration";
+        break;
+      case "remove-bg":
+        endpoint = "https://app.imggen.ai/v1/remove-background";
+        break;
+    }
 
     // Call the ImgGen API
-    const response = await fetch("https://app.imggen.ai/v1/unblur-image", {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "X-IMGGEN-KEY": API_KEY,
@@ -21,7 +37,7 @@ export async function unblurImage(imageFile: File): Promise<string> {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to unblur image");
+      throw new Error(errorData.message || `Failed to process image`);
     }
 
     const result = await response.json();
@@ -39,10 +55,15 @@ export async function unblurImage(imageFile: File): Promise<string> {
   }
 }
 
+// Legacy function for backward compatibility
+export async function unblurImage(imageFile: File): Promise<string> {
+  return processImage(imageFile, "unblur");
+}
+
 export function downloadImage(dataUrl: string, filename: string) {
   const link = document.createElement('a');
   link.href = dataUrl;
-  link.download = filename || 'unblurred-image.jpg';
+  link.download = filename || 'processed-image.jpg';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

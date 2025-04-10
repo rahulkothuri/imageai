@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { downloadImage } from "@/services/imageService";
+import { ProcessingType } from "./ProcessingTypeSelector";
 
 interface ImageComparisonProps {
   originalImage: string;
@@ -12,6 +13,7 @@ interface ImageComparisonProps {
   isProcessing: boolean;
   fileName: string;
   onReset: () => void;
+  processingType: ProcessingType;
 }
 
 const ImageComparison = ({
@@ -19,7 +21,8 @@ const ImageComparison = ({
   processedImage,
   isProcessing,
   fileName,
-  onReset
+  onReset,
+  processingType
 }: ImageComparisonProps) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,7 +105,31 @@ const ImageComparison = ({
 
   const handleDownload = () => {
     if (processedImage) {
-      downloadImage(processedImage, `unblurred-${fileName}`);
+      const prefixes = {
+        'unblur': 'unblurred',
+        'restore': 'restored',
+        'remove-bg': 'nobg'
+      };
+      const prefix = prefixes[processingType] || 'processed';
+      downloadImage(processedImage, `${prefix}-${fileName}`);
+    }
+  };
+
+  const getBeforeLabel = () => {
+    switch (processingType) {
+      case "unblur": return "Blurred";
+      case "restore": return "Original";
+      case "remove-bg": return "With Background";
+      default: return "Before";
+    }
+  };
+
+  const getAfterLabel = () => {
+    switch (processingType) {
+      case "unblur": return "Enhanced";
+      case "restore": return "Restored";
+      case "remove-bg": return "No Background";
+      default: return "After";
     }
   };
 
@@ -146,11 +173,19 @@ const ImageComparison = ({
               <div className="w-full space-y-2">
                 <Progress value={progressValue} className="h-2" />
                 <p className="text-sm font-medium text-gray-600 text-center">
-                  Enhancing your image... {Math.round(progressValue)}%
+                  {processingType === "unblur" 
+                    ? "Enhancing your image..." 
+                    : processingType === "restore" 
+                    ? "Restoring your image..." 
+                    : "Removing background..."} {Math.round(progressValue)}%
                 </p>
               </div>
               <p className="text-xs text-gray-500 text-center">
-                Using AI to remove blur and enhance details
+                {processingType === "unblur" 
+                  ? "Using AI to remove blur and enhance details" 
+                  : processingType === "restore" 
+                  ? "Using AI to restore damaged areas and enhance quality" 
+                  : "Using AI to precisely separate subject from background"}
               </p>
             </div>
           </div>
@@ -174,19 +209,19 @@ const ImageComparison = ({
             <div className="absolute top-0 left-0 w-full h-full">
               <img 
                 src={processedImage} 
-                alt="Enhanced"
+                alt={getAfterLabel()}
                 className="w-full h-full object-contain"
               />
             </div>
             
-            {/* Blurred Image (Left Side - controlled by slider) */}
+            {/* Original Image (Left Side - controlled by slider) */}
             <div 
               className="absolute top-0 left-0 h-full overflow-hidden"
               style={{ width: `${sliderPosition}%` }}
             >
               <img 
                 src={originalImage} 
-                alt="Blurred"
+                alt={getBeforeLabel()}
                 className="w-full h-full object-contain"
                 style={{ 
                   width: `${(100 / sliderPosition) * 100}%`, 
@@ -223,13 +258,13 @@ const ImageComparison = ({
             {/* Labels */}
             <div className="absolute top-4 left-4 z-20">
               <span className="bg-black/70 text-white text-xs px-4 py-1.5 rounded-full">
-                Blurred
+                {getBeforeLabel()}
               </span>
             </div>
             
             <div className="absolute top-4 right-4 z-20">
               <span className="bg-blue-500 text-white text-xs px-4 py-1.5 rounded-full">
-                Enhanced
+                {getAfterLabel()}
               </span>
             </div>
           </>
